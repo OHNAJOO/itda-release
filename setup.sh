@@ -15,11 +15,18 @@ command -v ollama >/dev/null || { echo "Ollama가 설치되어 있지 않습니�
 echo "==> 가상환경 (.venv, $PYTHON)"
 if [ ! -x .venv/bin/pip ]; then
   rm -rf .venv
-  "$PYTHON" -m venv .venv || {
+  # Ubuntu 기본 Python엔 ensurepip(python3-venv)이 없어 일반 venv가 실패한다 → pip 없이 만들고 get-pip.py로 채운다.
+  if ! "$PYTHON" -m venv .venv 2>/dev/null; then
+    echo "ensurepip이 없어 pip을 따로 설치합니다."
     rm -rf .venv
-    echo "venv 생성 실패. Ubuntu라면: sudo apt install python3-venv (또는 python3.12-venv)" >&2
-    exit 1
-  }
+    "$PYTHON" -m venv --without-pip .venv
+    GET_PIP=https://bootstrap.pypa.io/get-pip.py
+    { curl -fsSL "$GET_PIP" 2>/dev/null || wget -qO- "$GET_PIP"; } | .venv/bin/python - -q || {
+      rm -rf .venv
+      echo "pip 설치 실패. 인터넷 연결을 확인하거나: sudo apt install python3-venv" >&2
+      exit 1
+    }
+  fi
 fi
 .venv/bin/pip install --upgrade pip -q
 .venv/bin/pip install -r backend/requirements.txt

@@ -7,7 +7,8 @@
 ```text
 itda-release/
 ├─ backend/     # itda-backend의 app/, config/, demo/ + requirements.txt
-├─ static/      # itda-frontend 빌드 결과 (dist/)
+│  └─ static/   # itda-frontend 빌드 결과 (dist/)
+├─ wheels/      # Windows 설치기용 파이썬 패키지 (win_amd64, Python 3.12, 오프라인 설치)
 ├─ model/       # Modelfile + .gguf 모델 파일 (.gguf는 git 제외, 별도 전달)
 ├─ build.sh     # 개발자 PC용: 세 레포에서 빌드해 위 폴더를 채움
 ├─ setup.sh     # 최초 1회: 가상환경 생성, 패키지 설치, Ollama 모델 등록
@@ -58,13 +59,14 @@ Python 3.12가 기본 `python3`이 아니면 직접 지정한다: `PYTHON=python
 `itda-backend`, `itda-frontend`, `itda-model`이 이 폴더 옆(`../`)에 있어야 한다.
 
 ```bash
-./build.sh                  # backend/, static/, model/ 을 새로 채움
+./build.sh                  # backend/, wheels/, model/ 을 새로 채움
 SKIP_GGUF=1 ./build.sh      # 큰 .gguf 복사는 건너뜀 (Modelfile만 갱신)
 ```
 
 레포 위치가 다르면 `BACKEND_REPO`, `FRONTEND_REPO`, `MODEL_REPO`로 경로를 지정한다.
 
-- `backend/`와 `static/`은 빌드할 때마다 지워지고 다시 만들어진다. 수정은 원본 레포에서 한다.
+- `backend/`(화면 파일 `backend/static/` 포함)와 `wheels/`는 빌드할 때마다 지워지고 다시 만들어진다. 수정은 원본 레포에서 한다.
+- `wheels/win_amd64/`는 Windows 설치기(itda-installer)가 인터넷 없이 `pip install --no-index --find-links wheels/win_amd64 -r wheels/win_amd64/requirements.txt`로 쓰는 패키지다. Linux용 `setup.sh`는 쓰지 않는다.
 - `backend/requirements.txt`는 itda-backend의 `uv.lock`에서 만든다(개발용 패키지 제외, 버전 고정). 이 파일을 직접 고치지 않는다.
 - 이 빌드 과정에는 uv와 pnpm이 필요하다.
 
@@ -82,5 +84,5 @@ SKIP_GGUF=1 ./build.sh      # 큰 .gguf 복사는 건너뜀 (Modelfile만 갱신
 
 | 구분 | 대상 |
 | --- | --- |
-| 공유 | `backend/`, `static/`, `model/Modelfile`, 스크립트, `README.md` |
-| 제외 | `.venv/`, `*.db`, `model/*.gguf`, `backend/static`(실행 시 만드는 링크), `ollama.log` |
+| 공유 | `backend/`, `wheels/`, `model/Modelfile`, 스크립트, `README.md` |
+| 제외 | `.venv/`, `*.db`, `model/*.gguf`, `ollama.log` |

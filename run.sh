@@ -19,11 +19,6 @@ MODEL="$(.venv/bin/python -c "import yaml; print(yaml.safe_load(open('backend/co
 ollama show "$MODEL" >/dev/null 2>&1 \
   || { echo "모델 '$MODEL' 이 등록되지 않았습니다. ./setup.sh 를 다시 실행하세요." >&2; exit 1; }
 
-# 백엔드는 backend/static 에서 화면 파일을 찾는다 → 최상위 static/ 을 연결
-if [ ! -e backend/static ] || [ -L backend/static ]; then
-  ln -sfn ../static backend/static
-fi
-
 echo "잇다 서버 시작: http://127.0.0.1:8000  (종료: Ctrl+C)"
 cd backend
 exec ../.venv/bin/python -m app
